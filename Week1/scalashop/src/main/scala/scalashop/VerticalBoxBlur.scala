@@ -44,7 +44,10 @@ object VerticalBoxBlur {
    */
   def blur(src: Img, dst: Img, from: Int, end: Int, radius: Int): Unit = {
     // TODO implement this method using the `boxBlurKernel` method
-    ???
+    val strip = List.range(clamp(from, 0, src.height), clamp((end-1), 0, src.height))
+    for (column <- List.range(0, src.width)){
+      strip map (row => boxBlurKernel(src, row, column, radius)) zip strip foreach { case (blurPixel, row) => dst.update(row, column, blurPixel)}
+    }
   }
 
   /** Blurs the columns of the source image in parallel using `numTasks` tasks.
