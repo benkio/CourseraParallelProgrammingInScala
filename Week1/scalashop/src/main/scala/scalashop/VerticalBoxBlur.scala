@@ -44,9 +44,10 @@ object VerticalBoxBlur {
    */
   def blur(src: Img, dst: Img, from: Int, end: Int, radius: Int): Unit = {
     // TODO implement this method using the `boxBlurKernel` method
-    val stripsX = List.range(clamp(from, 0, src.width), clamp((end-1), 0, src.width))
-    for (row <- List.range(0, src.height)){
-      stripsX map (col => boxBlurKernel(src, row, col, radius)) zip stripsX foreach { case (blurPixel, col) => dst.update(row, col, blurPixel)}
+    for (x <- from until end) {
+      for (y <- 0 until src.height) {
+        dst.update(x,y, boxBlurKernel(src, x, y, radius))
+      }
     }
   }
 
@@ -58,7 +59,8 @@ object VerticalBoxBlur {
    */
   def parBlur(src: Img, dst: Img, numTasks: Int, radius: Int): Unit = {
     // TODO implement using the `task` construct and the `blur` method
-    ???
+    val columnsPerTasks = math.ceil((src.width / numTasks)).toInt
+    val columnsTasksRange = List.range(0, src.width).sliding(columnsPerTasks, columnsPerTasks) map (l => (l.head, l.reverse.head)) map { case (from, end) => task { blur(src, dst, from, end, radius) } } foreach { _.join}
   }
 
 }
