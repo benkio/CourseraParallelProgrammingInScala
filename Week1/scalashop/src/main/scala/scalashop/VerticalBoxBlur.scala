@@ -44,9 +44,9 @@ object VerticalBoxBlur {
    */
   def blur(src: Img, dst: Img, from: Int, end: Int, radius: Int): Unit = {
     // TODO implement this method using the `boxBlurKernel` method
-    val strip = List.range(clamp(from, 0, src.height), clamp((end-1), 0, src.height))
-    for (column <- List.range(0, src.width)){
-      strip map (row => boxBlurKernel(src, row, column, radius)) zip strip foreach { case (blurPixel, row) => dst.update(row, column, blurPixel)}
+    val stripsX = List.range(clamp(from, 0, src.width), clamp((end-1), 0, src.width))
+    for (row <- List.range(0, src.height)){
+      stripsX map (col => boxBlurKernel(src, row, col, radius)) zip stripsX foreach { case (blurPixel, col) => dst.update(row, col, blurPixel)}
     }
   }
 
