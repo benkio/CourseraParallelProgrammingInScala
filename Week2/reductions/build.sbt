@@ -8,6 +8,7 @@ courseId := "GVy8tIIKEeWXmQ4F86nmrw"
 
 // grading libraries
 libraryDependencies += "junit" % "junit" % "4.10" % "test"
+libraryDependencies += "org.scalacheck" %% "scalacheck" % "1.12.0"
 libraryDependencies ++= assignmentsMap.value.values.flatMap(_.dependencies).toSeq
 
 // include the common dir

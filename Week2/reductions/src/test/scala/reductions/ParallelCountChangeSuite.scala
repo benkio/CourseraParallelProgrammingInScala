@@ -6,6 +6,10 @@ import org.scalatest.FunSuite
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import common._
+import org.scalacheck.Properties
+import org.scalacheck.Prop.forAll
+import org.scalacheck.Gen.{ listOf, posNum }
+import org.scalacheck.Arbitrary.arbitrary
 
 import ParallelCountChange._
 
@@ -62,6 +66,11 @@ class ParallelCountChangeSuite extends FunSuite {
     check(50, List(1, 2, 5, 10), 341)
     check(250, List(1, 2, 5, 10, 20, 50), 177863)
   }
+}
 
+object ParallelCountChangesProperties extends Properties("ParallelCountChange") {
 
+  property("parallel implementation equals to sequence implementation") = forAll(posNum[Int], listOf(posNum[Int])) {
+    (money, coins) => countChange(money, coins) == parCountChange(money, coins, (x,y) => x < 10 || y.isEmpty)
+  }
 }
