@@ -41,7 +41,15 @@ object ParallelParenthesesBalancing {
   /** Returns `true` iff the parentheses in the input `chars` are balanced.
    */
   def balance(chars: Array[Char]): Boolean = {
-    val countPars =
+    var balanceCount = 0
+    for (c <- chars){
+      if (c == '(') balanceCount += 1
+      if (c == ')') balanceCount -= 1
+      if (balanceCount < 0) return false
+    }
+    balanceCount == 0
+
+    /*val countPars =
       chars
         .filter(x => x == '(' || x == ')')
         .map(x => x match {
@@ -52,6 +60,8 @@ object ParallelParenthesesBalancing {
       .toList
 //    println(chars.mkString("")  + " " + countPars)
     countPars.reverse.head == 0 && countPars.forall(_ >= 0)
+
+     */
   }
 
   /** Returns `true` iff the parentheses in the input `chars` are balanced.
@@ -59,7 +69,16 @@ object ParallelParenthesesBalancing {
   def parBalance(chars: Array[Char], threshold: Int): Boolean = {
 
     def traverse(idx: Int, until: Int) : (Int,Int) = {
-      val charsPortion = for (i <- idx until until) yield chars(i)
+      var minBalance, balanceCount = 0
+      for (i <- idx until until) {
+        val c = chars(i)
+        if (c == '(') balanceCount += 1
+        if (c == ')') balanceCount -= 1
+        if (balanceCount < minBalance) minBalance = balanceCount
+      }
+      (minBalance, balanceCount)
+      /*
+       val charsPortion = for (i <- idx until until) yield chars(i)
       val charsElab =
         charsPortion
           .filter(x => x == '(' || x == ')')
@@ -69,6 +88,7 @@ object ParallelParenthesesBalancing {
                })
           .scanLeft(0)(_ + _).toList
       (charsElab.min, charsElab.reverse.head)
+       */
     }
 
     def reduce(from: Int, until: Int) : (Int, Int)  = {
