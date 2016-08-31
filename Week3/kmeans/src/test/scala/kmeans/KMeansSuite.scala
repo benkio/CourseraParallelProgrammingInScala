@@ -17,7 +17,6 @@ class KMeansSuite extends FunSuite {
   def checkClassify(points: GenSeq[Point], means: GenSeq[Point], expected: GenMap[Point, GenSeq[Point]]) {
     assert(classify(points, means) == expected,
            s"classify($points, $means) should equal to $expected")
-    println(classify(points, means))
   }
 
   test("'classify should work for empty 'points' and empty 'means'") {
@@ -72,7 +71,9 @@ class KMeansSuite extends FunSuite {
     checkParClassify(points, means, expected)
   }
 
+  def checkUpdate(classified: GenMap[Point,GenSeq[Point]], means: GenSeq[Point], expected: GenSeq[Point]) {
+    assert(update(classified, means) == expected,
+           s"update($classified, $means) should equal to $expected")
+  }
+
 }
-
-
-  
