@@ -76,14 +76,23 @@ package object barneshut {
     val massX : Float = (bodies.map(a => a.mass * a.x).foldLeft(0f)(_+_)) / mass
     val massY : Float = (bodies.map(a => a.mass * a.y).foldLeft(0f)(_+_)) / mass
     val total : Int   =  bodies.length
-    def insert(b: Body): Quad =
-      if (size <= minimumSize) Leaf(centerX, centerY, size, bodies :+ b)
+    def insert(b: Body): Quad = {
+      val newBodies = (bodies :+ b)
+      if (size <= minimumSize)
+        Leaf(centerX, centerY, size, newBodies)
       else {
-        val (centerNw, centerNe, centerSw, centerSe) = ((centerX - size/4, centerY - size/4), (centerX + size/4, centerY - size/4), (centerX - size/4, centerY + size/4), (centerX + size/4, centerY + size/4))
-        val forkNode = Fork(Empty(centerNw._1, centerNw._2, size/2), Empty(centerNe._1, centerNe._2, size/2), Empty(centerSw._1, centerSw._2, size/2), Empty(centerSe._1, centerSe._2, size/2))
-                           (bodies :+ b).foreach(forkNode.insert(_))
+        val (centerNw, centerNe, centerSw, centerSe) = ((centerX - size/4, centerY - size/4),
+                                                        (centerX + size/4, centerY - size/4),
+                                                        (centerX - size/4, centerY + size/4),
+                                                        (centerX + size/4, centerY + size/4))
+        val forkNode = Fork(Empty(centerNw._1, centerNw._2, size/2),
+                            Empty(centerNe._1, centerNe._2, size/2),
+                            Empty(centerSw._1, centerSw._2, size/2),
+                            Empty(centerSe._1, centerSe._2, size/2))
+        for(x <- newBodies) forkNode.insert(x)
         forkNode
       }
+    }
   }
 
   def minimumSize = 0.00001f
@@ -135,9 +144,20 @@ package object barneshut {
           // no force
         case Leaf(_, _, _, bodies) =>
           // add force contribution of each body by calling addForce
+          bodies.foreach(b => addForce(b.mass, b.x, b.y))
         case Fork(nw, ne, sw, se) =>
           // see if node is far enough from the body,
           // or recursion is needed
+          val dist = distance(quad.centerX, quad.centerY, x, y)
+          val quadSize = nw.size + ne.size
+          if (quadSize / dist < theta)
+            addForce(quad.mass, quad.massX, quad.massY)
+          else{
+            traverse(se)
+            traverse(sw)
+            traverse(ne)
+            traverse(nw)
+          }
       }
 
       traverse(quad)
@@ -160,14 +180,21 @@ package object barneshut {
     for (i <- 0 until matrix.length) matrix(i) = new ConcBuffer
 
     def +=(b: Body): SectorMatrix = {
-      ???
+      var (sectorCoordinateX, sectorCoordinateY) = (((b.x - boundaries.minX) / sectorSize).toInt, ((b.y - boundaries.minY) / sectorSize).toInt)
+      if (b.x <  boundaries.minX) sectorCoordinateX = 0
+      if (b.x >= boundaries.maxX) sectorCoordinateX = sectorPrecision - 1
+      if (b.y <  boundaries.minY) sectorCoordinateY = 0
+      if (b.y >= boundaries.maxY) sectorCoordinateY = sectorPrecision - 1
+      println(sectorCoordinateX.toString + " - "  + sectorCoordinateY.toString)
+      this(sectorCoordinateX, sectorCoordinateY) += b
       this
     }
 
     def apply(x: Int, y: Int) = matrix(y * sectorPrecision + x)
 
     def combine(that: SectorMatrix): SectorMatrix = {
-      ???
+      for (i <- 0 until matrix.length) matrix(i) = matrix(i).combine(that.matrix(i))
+      this
     }
 
     def toQuad(parallelism: Int): Quad = {
